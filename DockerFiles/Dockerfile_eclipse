@@ -1,0 +1,45 @@
+FROM victorialservera31/desktop:latest
+
+# Actualizar los paquetes e instalar las dependencias necesarias
+RUN apt update && \
+    apt install -y openjdk-17-jdk
+
+# Detectar la arquitectura, descargar e instalar el ID de Eclipse
+RUN echo '#!/bin/bash\n\
+ARCH=$(arch)\n\
+echo "La arquitectura del sistema es: $ARCH"\n\
+if [ "$ARCH" == "x86_64" ]; then\n\
+    URL="https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-linux-gtk-x86_64.tar.gz&r=1"\n\
+elif [ "$ARCH" == "aarch64" ] || [ "$ARCH" == "arm64" ]; then\n\
+    URL="https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-linux-gtk-aarch64.tar.gz&r=1"\n\
+else\n\
+    echo "Unsupported architecture: $ARCH"\n\
+    exit 1\n\
+fi\n\
+echo "Descargando Eclipse desde: $URL"\n\
+wget -O eclipse-java.tar.gz "$URL"\n\
+tar -xzf eclipse-java.tar.gz -C /opt\n\
+rm eclipse-java.tar.gz' > /tmp/install_eclipse.sh
+
+# Ejecutar el script de instalación
+RUN chmod +x /tmp/install_eclipse.sh && /tmp/install_eclipse.sh
+
+# Crear enlace simbólico para Eclipse
+RUN ln -s /opt/eclipse/eclipse /usr/local/bin/eclipse
+
+# Crear archivo de entrada de escritorio para Eclipse
+RUN echo '[Desktop Entry]\n\
+Name=Eclipse\n\
+Type=Application\n\
+Exec=/usr/local/bin/eclipse\n\
+Terminal=false\n\
+Icon=/opt/eclipse/icon.xpm\n\
+Comment=Integrated Development Environment\n\
+NoDisplay=false\n\
+Categories=Development;IDE;\n\
+Name[en]=Eclipse' > /usr/share/applications/eclipse.desktop
+
+# Hacer el archivo de escritorio ejecutable
+RUN chmod +x /usr/share/applications/eclipse.desktop
+
+

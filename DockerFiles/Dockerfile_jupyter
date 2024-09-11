@@ -1,0 +1,8 @@
+FROM victorialservera31/desktop:latest
+
+# Se actualizan los paquetes e instalan las dependencias necesarias
+RUN apt update && \
+    apt install -y python3 python3-pip nodejs npm && \
+    pip3 install jupyter \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*

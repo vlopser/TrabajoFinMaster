@@ -1,0 +1,6 @@
+FROM victorialservera31/desktop:latest
+
+# Actualizar los paquetes e instalar las dependencias necesarias
+RUN apt-get update && \
+    apt-get install -y codeblocks && \
+    rm -rf /var/lib/apt/lists/*

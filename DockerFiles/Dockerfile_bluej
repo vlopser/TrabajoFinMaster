@@ -1,0 +1,13 @@
+FROM victorialservera31/desktop:latest
+
+#Actualizar los paquetes e instalar las dependencias necesarias
+RUN apt update && \
+    apt install -y openjdk-17-jdk
+
+#Descargar e instalar BlueJ y eliminar archivos innecesarios
+RUN wget -O bluej "https://www.bluej.org/download/files/BlueJ-linux-530.deb" && \
+    dpkg -i bluej && \
+    rm bluej && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
+

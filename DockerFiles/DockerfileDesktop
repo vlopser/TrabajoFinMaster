@@ -1,0 +1,38 @@
+FROM ubuntu:20.04
+
+# Establecer la variable de entorno para evitar la interacción durante la instalación de paquetes
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Actualizar e instalar SSH, Xfce, xrdp, y Firefox
+RUN apt-get update && \
+    apt-get install -y \
+    openssh-server \
+    xfce4 \
+    xfce4-session \
+    xrdp \
+    xfce4-terminal \
+    firefox \
+    && apt-get clean
+
+# Configurar zona horaria a España
+RUN ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata
+
+# Configurar SSH para permitir autenticación con contraseña y acceso a root
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+# Configurar contraseña de root
+RUN echo 'root:password' | chpasswd
+
+# Habilitar el servicio xrdp y configurarlo para usar xfce4
+RUN systemctl enable xrdp && \
+    adduser xrdp ssl-cert && \
+    echo "xfce4-session" > /root/.xsession
+
+# Configurar el emulador de terminal predeterminado
+RUN echo 'export TERM=xterm' >> /root/.bashrc && \
+    echo 'export COLORTERM=xfce4-terminal' >> /root/.bashrc
+
+# Limpiar cache de apt-get
+RUN apt-get clean
